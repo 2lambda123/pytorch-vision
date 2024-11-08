@@ -3,6 +3,8 @@ import functools
 import pathlib
 from typing import Any, BinaryIO, cast, Dict, List, Optional, Tuple, Union
 
+import defusedxml.ElementTree
+
 from torchdata.datapipes.iter import Demultiplexer, Filter, IterDataPipe, IterKeyZipper, LineReader, Mapper
 from torchvision.datasets import VOCDetection
 from torchvision.prototype.datasets.utils import Dataset, EncodedImage, HttpResource, OnlineResource
@@ -19,7 +21,6 @@ from torchvision.prototype.tv_tensors import Label
 from torchvision.tv_tensors import BoundingBoxes
 
 from .._api import register_dataset, register_info
-import defusedxml.ElementTree
 
 NAME = "voc"
 
@@ -95,7 +96,9 @@ class VOC(Dataset):
             return None
 
     def _parse_detection_ann(self, buffer: BinaryIO) -> Dict[str, Any]:
-        ann = cast(Dict[str, Any], VOCDetection.parse_voc_xml(defusedxml.ElementTree.parse(buffer).getroot())["annotation"])
+        ann = cast(
+            Dict[str, Any], VOCDetection.parse_voc_xml(defusedxml.ElementTree.parse(buffer).getroot())["annotation"]
+        )
         buffer.close()
         return ann
 
