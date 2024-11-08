@@ -2,7 +2,8 @@ import enum
 import functools
 import pathlib
 from typing import Any, BinaryIO, cast, Dict, List, Optional, Tuple, Union
-from xml.etree import ElementTree
+
+import defusedxml.ElementTree
 
 from torchdata.datapipes.iter import Demultiplexer, Filter, IterDataPipe, IterKeyZipper, LineReader, Mapper
 from torchvision.datasets import VOCDetection
@@ -95,7 +96,9 @@ class VOC(Dataset):
             return None
 
     def _parse_detection_ann(self, buffer: BinaryIO) -> Dict[str, Any]:
-        ann = cast(Dict[str, Any], VOCDetection.parse_voc_xml(ElementTree.parse(buffer).getroot())["annotation"])
+        ann = cast(
+            Dict[str, Any], VOCDetection.parse_voc_xml(defusedxml.ElementTree.parse(buffer).getroot())["annotation"]
+        )
         buffer.close()
         return ann
 
